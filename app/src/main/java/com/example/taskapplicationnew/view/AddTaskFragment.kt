@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +19,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -36,12 +36,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
 import com.example.taskapplicationnew.R
 import com.example.taskapplicationnew.model.data.Task
 import com.example.taskapplicationnew.ui.theme.TaskApplicationNewTheme
@@ -78,11 +75,6 @@ class AddTaskFragment : Fragment() {
                         AddTask(viewModel = taskViewModel) {
                             findNavController().navigate(R.id.dashboardFragment)
                         }
-//                        AddTask(viewModel = taskViewModel) { args ->
-//                            val action = AddTaskFragmentDirections.actionAddTaskFragmentToDashboardFragment()
-//                            findNavController()
-//                                .navigate(action)
-//                        }
                     }
                 }
             }
@@ -104,6 +96,8 @@ fun AddTask(
         verticalArrangement = Arrangement.spacedBy(13.dp, alignment = Alignment.Bottom),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val (snackbarVisibleState, setSnackBarState) = remember { mutableStateOf(false) }
+
 
         var taskTitle by remember {
             mutableStateOf("")
@@ -119,41 +113,34 @@ fun AddTask(
         TextField(value = taskBody, onValueChange = { taskBody = it },
             label = { Label(typeInput = "Task Details?") })
         DividerOne()
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(vertical = 15.dp)) {
+
+            DividerOne()
+            SpecialButton(text = "Save Task(s)") {
+                setSnackBarState(!snackbarVisibleState)
+                viewModel.addTask(task = Task(title = taskTitle, body = taskBody))
+            }
+            SpecialButton(text = stringResource(R.string.viewAll)) {
+                onNavigate()
+            }
+            if (snackbarVisibleState) {
+                Snackbar(
+                    action = {
+                        Button(onClick = {
+                            setSnackBarState(!snackbarVisibleState)
+                        }) {
+                            Text(text = "Hide Notification")
+                        }
+                    },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Column() {
+                        Text(text = "This Task has been saved ✅")
+                    }
+                }
+            }
         }
-        DividerOne()
-        SpecialButton(text = "Save Task(s)") {
-            viewModel.addTask(task = Task(title = taskTitle, body = taskBody))
-        }
-        SpecialButton(text = stringResource(R.string.viewAll)) {
-            onNavigate()
-        }
-//        Button(
-//            onClick = {
-//                viewModel.addTask(task = Task(title = taskTitle, body = taskBody))
-//            }, modifier = Modifier
-//                .fillMaxWidth()
-//                .height(50.dp),
-//            colors = ButtonDefaults.buttonColors(
-//                containerColor = Color.White,
-//                disabledContainerColor = Color.Gray
-//            )
-//        ) {
-//            Text(
-//                text = "Save Task(s)",
-//                fontSize = 20.sp,
-//                color = Color.Black
-//            )
-//        }
-//        Button(onClick = {
-//            val args: Bundle = bundleOf(
-//                "taskTitle" to taskTitle,
-//                "taskBody" to taskBody,
-//            )
-//            onNavigate()
-//        }) {
-//            Text(text = stringResource(R.string.viewAll))
-//        }
     }
 }
 
@@ -172,9 +159,6 @@ fun IconOne() {
     }
 }
 
-/**
- *
- */
 @Composable
 fun DividerOne() {
     Divider(
@@ -183,7 +167,6 @@ fun DividerOne() {
         modifier = Modifier.padding(top = 48.dp)
     )
 }
-
 
 @Composable
 fun Label(typeInput: String) {
@@ -194,15 +177,14 @@ fun Label(typeInput: String) {
 }
 
 @Composable
-fun SpecialButton (text: String, onClick: () -> Unit){
-    val (snackbarVisibleState, setSnackBarState) = remember { mutableStateOf(false) }
-
+fun SpecialButton(text: String, onClick: () -> Unit) {
     Button(
         onClick = {
             onClick()
         }, modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp),
+            .height(80.dp)
+            .padding(20.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.White,
             disabledContainerColor = Color.Gray
@@ -215,5 +197,3 @@ fun SpecialButton (text: String, onClick: () -> Unit){
         )
     }
 }
-
-

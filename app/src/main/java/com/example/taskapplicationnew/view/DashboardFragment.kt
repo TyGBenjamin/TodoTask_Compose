@@ -86,7 +86,6 @@ class DashboardFragment : Fragment() {
                                             taskViewModel.deleteTask(task)
                                             taskViewModel.getTasks()
                                         }
-
                                     }
                                 }
                             }
@@ -162,4 +161,3 @@ fun ContactRow(task: Task) {
         }
     }
 }
-
